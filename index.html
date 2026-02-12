@@ -41,8 +41,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .btn-icon.delete:hover{background:var(--red-dim);border-color:var(--red);color:var(--red)}
 
 /* Config bar */
-.config-bar{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;align-items:stretch}
-.config-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;flex:1;min-width:180px;overflow:hidden}
+.config-bar{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+.config-presets{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px}
+.config-presets label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px}
+.config-sliders{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.config-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;overflow:hidden}
 .config-card label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px}
 .config-card .value-row{display:flex;align-items:center;gap:10px}
 .config-card input[type="range"]{flex:1;accent-color:var(--accent);height:4px;min-width:0}
@@ -80,17 +83,25 @@ tbody tr:hover{background:rgba(108,159,255,.03)}
 /* Row number */
 .row-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);text-align:center;width:36px}
 
-/* Summary cards */
-.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px}
-.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-.summary-card .label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-.summary-card .number{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;letter-spacing:-1px}
-.summary-card .sub{font-size:12px;color:var(--text-dim);margin-top:4px}
-.summary-card.blue .number{color:var(--accent)}
-.summary-card.green .number{color:var(--green)}
-.summary-card.orange .number{color:var(--orange)}
-.summary-card.purple .number{color:var(--purple)}
-.summary-card.red .number{color:var(--red)}
+/* Summary strip */
+.summary-strip{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.ss-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;flex:1;min-width:140px;display:flex;flex-direction:column}
+.ss-item .ss-label{font-size:10px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.ss-item .ss-value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;letter-spacing:-1px}
+.ss-item .ss-sub{font-size:11px;color:var(--text-dim);margin-top:3px}
+.ss-item.blue .ss-value{color:var(--accent)}
+.ss-item.green .ss-value{color:var(--green)}
+.ss-item.orange .ss-value{color:var(--orange)}
+.ss-item.purple .ss-value{color:var(--purple)}
+.ss-item.red .ss-value{color:var(--red)}
+.ss-total{background:var(--surface2);border:1px solid var(--accent);border-radius:var(--radius);padding:16px 20px;flex:1;min-width:160px}
+.ss-total .ss-label{font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.ss-total .ss-value{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--green);letter-spacing:-1px}
+.ss-total .ss-sub{font-size:11px;color:var(--text-dim);margin-top:3px}
+
+/* Mobile cards */
+.mobile-cards{display:none}
+.mobile-cards-add{display:none;text-align:center;margin-bottom:16px}
 
 /* Breakdown */
 .breakdown{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
@@ -126,38 +137,71 @@ tbody tr:hover{background:rgba(108,159,255,.03)}
 
 /* Responsive */
 @media(max-width:1024px){
-  .config-bar{flex-wrap:wrap}
-  .config-card{min-width:calc(50% - 12px)}
+  .config-sliders{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:768px){
   body{padding:14px 10px}
   .app{max-width:100%}
-  .header{flex-direction:column;gap:10px;align-items:flex-start;margin-bottom:20px;padding-bottom:16px}
+
+  /* Header */
+  .header{flex-direction:column;gap:10px;align-items:flex-start;margin-bottom:16px;padding-bottom:14px}
   .header h1{font-size:18px}
   .header-actions{width:100%;display:flex}
   .header-actions .btn{flex:1;justify-content:center;font-size:12px;padding:8px 12px}
-  .config-bar{flex-direction:column;gap:10px;margin-bottom:14px}
-  .config-card{min-width:100%;padding:12px 16px}
-  .config-card .value-display{font-size:16px}
+
+  /* Config - compact sliders in 3-col */
+  .config-bar{gap:10px;margin-bottom:12px}
+  .config-presets{padding:12px 14px}
+  .config-sliders{grid-template-columns:repeat(3,1fr);gap:8px}
+  .config-card.config-slim{padding:10px 12px}
+  .config-card.config-slim label{font-size:9px;letter-spacing:.5px;margin-bottom:5px}
+  .config-card.config-slim .value-display{font-size:14px;min-width:40px}
+  .config-card.config-slim .value-unit{font-size:9px}
+  .config-card.config-slim input[type="range"]{height:3px}
   .preset-chip{font-size:11px;padding:5px 11px}
-  .summary{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
-  .summary-card{padding:14px}
-  .summary-card .number{font-size:20px}
-  .summary-card .label{font-size:10px}
-  .summary-card .sub{font-size:11px}
-  .table-wrap{overflow-x:auto;margin-bottom:14px;border-radius:8px}
-  table{min-width:720px}
-  tbody td{padding:6px 8px}
-  .t-input{font-size:16px;padding:8px 10px}
-  .t-input.num{width:72px}
-  .t-input.task-name{min-width:140px}
-  .t-select{font-size:16px;padding:8px 10px;-webkit-appearance:menulist;appearance:menulist;background-image:none;padding-right:10px}
+
+  /* Hide desktop table, show mobile cards */
+  .desktop-table{display:none}
+  .mobile-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+  .mobile-cards-add{display:block}
+
+  /* Mobile task card */
+  .m-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative}
+  .m-card-head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .m-card-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);background:var(--surface3);width:24px;height:24px;border-radius:4px;display:grid;place-items:center;flex-shrink:0}
+  .m-card-head input{flex:1;font-family:inherit;font-size:14px;color:var(--text);background:var(--surface3);border:1px solid transparent;border-radius:var(--radius-sm);padding:8px 10px}
+  .m-card-head input:focus{outline:none;border-color:var(--accent)}
+  .m-card-head select{font-family:inherit;font-size:14px;color:var(--text);background:var(--surface3);border:1px solid transparent;border-radius:var(--radius-sm);padding:8px 10px;-webkit-appearance:menulist;appearance:menulist;min-width:100px}
+  .m-card-head .btn-icon{position:absolute;top:10px;right:10px;width:26px;height:26px;font-size:12px}
+  .m-card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+  .m-card-field{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:6px;padding:6px 10px}
+  .m-card-field span{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+  .m-card-field input{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);background:transparent;border:none;text-align:right;width:50px;outline:none}
+  .m-card-result{display:flex;gap:6px;margin-top:8px}
+  .m-card-result .m-res{flex:1;background:var(--surface2);border-radius:6px;padding:6px 10px;text-align:center}
+  .m-card-result .m-res span{font-size:9px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:2px}
+  .m-card-result .m-res b{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-dim)}
+  .m-card-result .m-res.total b{color:var(--accent);font-size:14px}
+
+  /* Summary horizontal rows */
+  .summary-strip{flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+  .ss-item,.ss-total{flex-direction:row;align-items:center;justify-content:space-between;border-radius:0;border:none;border-bottom:1px solid var(--border);min-width:auto;padding:12px 16px;gap:8px}
+  .ss-item:last-of-type{border-bottom:1px solid var(--border)}
+  .ss-item .ss-label,.ss-total .ss-label{margin-bottom:0;min-width:80px}
+  .ss-item .ss-value{font-size:18px;text-align:right;flex:1}
+  .ss-item .ss-sub{margin-top:0;text-align:right;min-width:80px}
+  .ss-total{border-bottom:none;background:var(--surface2)}
+  .ss-total .ss-value{font-size:20px;text-align:right;flex:1}
+  .ss-total .ss-sub{margin-top:0;text-align:right;min-width:100px}
+
+  /* Breakdown */
   .breakdown{padding:14px;margin-bottom:14px}
   .add-row-btn{font-size:12px;padding:8px 18px}
   .btn-icon{width:28px;height:28px}
 }
 @media(max-width:400px){
-  .summary{grid-template-columns:1fr}
+  .config-sliders{grid-template-columns:repeat(3,1fr)}
+  .m-card-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -176,7 +220,7 @@ tbody tr:hover{background:rgba(108,159,255,.03)}
 
   <!-- Presets -->
   <div class="config-bar">
-    <div class="config-card" style="flex:2;min-width:280px">
+    <div class="config-card config-presets">
       <label>Quick Presets</label>
       <div class="preset-chips">
         <button class="preset-chip" onclick="applyPreset('banner')">HTML5 Banner</button>
@@ -186,31 +230,33 @@ tbody tr:hover{background:rgba(108,159,255,.03)}
         <button class="preset-chip" onclick="applyPreset('custom')">Custom</button>
       </div>
     </div>
-    <div class="config-card">
-      <label>Buffer</label>
-      <div class="value-row">
-        <input type="range" id="bufferRange" min="0" max="50" value="15" oninput="updateBuffer()">
-        <div class="value-display" id="bufferDisplay">15<span class="value-unit">%</span></div>
+    <div class="config-sliders">
+      <div class="config-card config-slim">
+        <label>Buffer</label>
+        <div class="value-row">
+          <input type="range" id="bufferRange" min="0" max="50" value="15" oninput="updateBuffer()">
+          <div class="value-display" id="bufferDisplay">15<span class="value-unit">%</span></div>
+        </div>
       </div>
-    </div>
-    <div class="config-card">
-      <label>Correction Rounds</label>
-      <div class="value-row">
-        <input type="range" id="correctionRange" min="0" max="5" value="1" oninput="updateCorrection()">
-        <div class="value-display" id="correctionDisplay">1<span class="value-unit"> rnd</span></div>
+      <div class="config-card config-slim">
+        <label>Corr. Rounds</label>
+        <div class="value-row">
+          <input type="range" id="correctionRange" min="0" max="5" value="1" oninput="updateCorrection()">
+          <div class="value-display" id="correctionDisplay">1<span class="value-unit"> rnd</span></div>
+        </div>
       </div>
-    </div>
-    <div class="config-card">
-      <label>Min / Correction</label>
-      <div class="value-row">
-        <input type="range" id="corrMinRange" min="5" max="60" value="15" step="5" oninput="updateCorrMin()">
-        <div class="value-display" id="corrMinDisplay">15<span class="value-unit"> min</span></div>
+      <div class="config-card config-slim">
+        <label>Min / Corr.</label>
+        <div class="value-row">
+          <input type="range" id="corrMinRange" min="5" max="60" value="15" step="5" oninput="updateCorrMin()">
+          <div class="value-display" id="corrMinDisplay">15<span class="value-unit"> min</span></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Task Table -->
-  <div class="table-wrap">
+  <!-- Task Table (desktop) -->
+  <div class="table-wrap desktop-table">
     <table>
       <thead>
         <tr>
@@ -234,32 +280,38 @@ tbody tr:hover{background:rgba(108,159,255,.03)}
     </div>
   </div>
 
+  <!-- Task Cards (mobile) -->
+  <div class="mobile-cards" id="mobileCards"></div>
+  <div class="mobile-cards-add">
+    <button class="add-row-btn" onclick="addTask()">+ Add Task</button>
+  </div>
+
   <!-- Summary -->
-  <div class="summary" id="summaryCards">
-    <div class="summary-card blue">
-      <div class="label">Base Time</div>
-      <div class="number" id="sumBase">0.00h</div>
-      <div class="sub" id="sumBaseDay">0.00 days</div>
+  <div class="summary-strip" id="summaryCards">
+    <div class="ss-item blue">
+      <div class="ss-label">Base Time</div>
+      <div class="ss-value" id="sumBase">0.00h</div>
+      <div class="ss-sub" id="sumBaseDay">0.00 days</div>
     </div>
-    <div class="summary-card orange">
-      <div class="label">Buffer</div>
-      <div class="number" id="sumBuffer">0.00h</div>
-      <div class="sub" id="sumBufferPct">15%</div>
+    <div class="ss-item orange">
+      <div class="ss-label">Buffer</div>
+      <div class="ss-value" id="sumBuffer">0.00h</div>
+      <div class="ss-sub" id="sumBufferPct">15%</div>
     </div>
-    <div class="summary-card red">
-      <div class="label">Corrections</div>
-      <div class="number" id="sumCorr">0.00h</div>
-      <div class="sub" id="sumCorrInfo">1 round × 15 min</div>
+    <div class="ss-item red">
+      <div class="ss-label">Corrections</div>
+      <div class="ss-value" id="sumCorr">0.00h</div>
+      <div class="ss-sub" id="sumCorrInfo">1 round × 15 min</div>
     </div>
-    <div class="summary-card green">
-      <div class="label">Total Estimate</div>
-      <div class="number" id="sumTotal">0.00h</div>
-      <div class="sub" id="sumTotalDay">0.00 days (8h/day)</div>
+    <div class="ss-item purple">
+      <div class="ss-label">Total Tasks</div>
+      <div class="ss-value" id="sumTasks">0</div>
+      <div class="ss-sub" id="sumTasksInfo">0 master + 0 version</div>
     </div>
-    <div class="summary-card purple">
-      <div class="label">Total Tasks</div>
-      <div class="number" id="sumTasks">0</div>
-      <div class="sub" id="sumTasksInfo">0 master + 0 version</div>
+    <div class="ss-total">
+      <div class="ss-label">Total Estimate</div>
+      <div class="ss-value" id="sumTotal">0.00h</div>
+      <div class="ss-sub" id="sumTotalDay">0.00 days (8h/day)</div>
     </div>
   </div>
 
@@ -360,11 +412,16 @@ function updateCorrMin() {
 
 function render() {
   const tbody = document.getElementById('taskBody');
+  const mcont = document.getElementById('mobileCards');
   tbody.innerHTML = '';
+  mcont.innerHTML = '';
+
   tasks.forEach((t, i) => {
     const mh = (t.masterQty * t.minMaster) / 60;
     const vh = (t.versionQty * t.minVersion) / 60;
     const sub = mh + vh;
+
+    // Desktop table row
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="row-num">${i + 1}</td>
@@ -384,6 +441,32 @@ function render() {
       <td><button class="btn-icon delete" onclick="removeTask(${t.id})" title="Remove">✕</button></td>
     `;
     tbody.appendChild(tr);
+
+    // Mobile card
+    const card = document.createElement('div');
+    card.className = 'm-card';
+    card.innerHTML = `
+      <div class="m-card-head">
+        <div class="m-card-num">${i + 1}</div>
+        <input value="${esc(t.name)}" placeholder="Task name..." onchange="updateField(${t.id},'name',this.value)">
+        <select onchange="updateField(${t.id},'type',this.value)">
+          ${Object.entries(PRESETS).map(([k,v]) => `<option value="${k}" ${t.type===k?'selected':''}>${v.label}</option>`).join('')}
+        </select>
+        <button class="btn-icon delete" onclick="removeTask(${t.id})">✕</button>
+      </div>
+      <div class="m-card-grid">
+        <div class="m-card-field"><span>Master Qty</span><input type="number" min="0" value="${t.masterQty}" onchange="updateField(${t.id},'masterQty',this.value)"></div>
+        <div class="m-card-field"><span>Min/Master</span><input type="number" min="0" value="${t.minMaster}" onchange="updateField(${t.id},'minMaster',this.value)"></div>
+        <div class="m-card-field"><span>Version Qty</span><input type="number" min="0" value="${t.versionQty}" onchange="updateField(${t.id},'versionQty',this.value)"></div>
+        <div class="m-card-field"><span>Min/Ver</span><input type="number" min="0" value="${t.minVersion}" onchange="updateField(${t.id},'minVersion',this.value)"></div>
+      </div>
+      <div class="m-card-result">
+        <div class="m-res"><span>Master</span><b>${mh.toFixed(2)}h</b></div>
+        <div class="m-res"><span>Version</span><b>${vh.toFixed(2)}h</b></div>
+        <div class="m-res total"><span>Subtotal</span><b>${sub.toFixed(2)}h</b></div>
+      </div>
+    `;
+    mcont.appendChild(card);
   });
   recalc();
 }
