@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Task Estimation Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#232733;--surface3:#2c3040;
+  --border:#333847;--border-light:#444a5e;
+  --text:#f0f1f5;--text-dim:#b8bcc8;--text-muted:#8a8fa3;
+  --accent:#6c9fff;--accent-dim:rgba(108,159,255,.12);--accent-glow:rgba(108,159,255,.25);
+  --green:#4ecb8d;--green-dim:rgba(78,203,141,.12);
+  --orange:#f0a050;--orange-dim:rgba(240,160,80,.12);
+  --red:#f06060;--red-dim:rgba(240,96,96,.12);
+  --purple:#a07cff;--purple-dim:rgba(160,124,255,.12);
+  --radius:10px;--radius-sm:6px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px}
+.app{max-width:1200px;margin:0 auto}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.header h1{font-size:22px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:10px}
+.header h1 span{background:var(--accent);color:#0f1117;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.5px}
+.header-actions{display:flex;gap:10px}
+
+/* Buttons */
+.btn{font-family:inherit;font-size:13px;font-weight:600;border:none;border-radius:var(--radius-sm);padding:9px 18px;cursor:pointer;transition:all .15s ease;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:var(--accent);color:#0f1117}
+.btn-primary:hover{filter:brightness(1.1);box-shadow:0 0 20px var(--accent-glow)}
+.btn-ghost{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border-light);color:var(--text)}
+.btn-danger{background:var(--red-dim);color:var(--red)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-icon{width:32px;height:32px;padding:0;display:grid;place-items:center;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;transition:all .15s}
+.btn-icon:hover{border-color:var(--border-light);color:var(--text)}
+.btn-icon.delete:hover{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+
+/* Config bar */
+.config-bar{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;align-items:stretch}
+.config-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;flex:1;min-width:180px;overflow:hidden}
+.config-card label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:8px}
+.config-card .value-row{display:flex;align-items:center;gap:10px}
+.config-card input[type="range"]{flex:1;accent-color:var(--accent);height:4px;min-width:0}
+.config-card .value-display{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--accent);min-width:56px;text-align:right;white-space:nowrap;flex-shrink:0}
+.config-card .value-unit{font-size:11px;color:var(--text-muted)}
+.preset-chips{display:flex;gap:6px;flex-wrap:wrap}
+.preset-chip{font-family:inherit;font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;transition:all .15s}
+.preset-chip:hover{border-color:var(--accent);color:var(--accent)}
+.preset-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+/* Table */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;padding:14px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2);position:sticky;top:0;white-space:nowrap}
+thead th.center{text-align:center}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:rgba(108,159,255,.03)}
+
+/* Inputs in table */
+.t-input{font-family:inherit;font-size:13px;color:var(--text);background:var(--surface3);border:1px solid transparent;border-radius:var(--radius-sm);padding:8px 12px;width:100%;transition:all .15s}
+.t-input:focus{outline:none;border-color:var(--accent);background:var(--bg);box-shadow:0 0 0 3px var(--accent-dim)}
+.t-input::placeholder{color:var(--text-muted)}
+.t-input.num{font-family:'JetBrains Mono',monospace;text-align:center;width:80px}
+.t-input.task-name{min-width:200px}
+.t-select{font-family:inherit;font-size:13px;color:var(--text);background:var(--surface3);border:1px solid transparent;border-radius:var(--radius-sm);padding:8px 12px;cursor:pointer;transition:all .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b90a0' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.t-select:focus{outline:none;border-color:var(--accent)}
+.t-select option{background:#1a1d27;color:#f0f1f5;padding:8px}
+
+/* Computed cells */
+.computed{font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;color:var(--text);padding:8px 12px}
+.computed.highlight{color:var(--accent);font-weight:600}
+
+/* Row number */
+.row-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);text-align:center;width:36px}
+
+/* Summary cards */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px}
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.summary-card .label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.summary-card .number{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;letter-spacing:-1px}
+.summary-card .sub{font-size:12px;color:var(--text-dim);margin-top:4px}
+.summary-card.blue .number{color:var(--accent)}
+.summary-card.green .number{color:var(--green)}
+.summary-card.orange .number{color:var(--orange)}
+.summary-card.purple .number{color:var(--purple)}
+.summary-card.red .number{color:var(--red)}
+
+/* Breakdown */
+.breakdown{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.breakdown h3{font-size:13px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.breakdown-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.breakdown-item{background:var(--surface2);border-radius:var(--radius-sm);padding:14px}
+.breakdown-item .bi-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+.breakdown-item .bi-value{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600}
+.breakdown-item .bi-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* Visual bar */
+.time-bar{height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;display:flex;margin-top:8px}
+.time-bar .seg{height:100%;transition:width .3s ease}
+.time-bar .seg.master{background:var(--accent)}
+.time-bar .seg.version{background:var(--purple)}
+.time-bar .seg.buffer{background:var(--orange)}
+.time-bar .seg.correction{background:var(--red)}
+.bar-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.bar-legend span{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:5px}
+.bar-legend span::before{content:'';width:10px;height:10px;border-radius:2px;display:block}
+.bar-legend .lm::before{background:var(--accent)}
+.bar-legend .lv::before{background:var(--purple)}
+.bar-legend .lb::before{background:var(--orange)}
+.bar-legend .lc::before{background:var(--red)}
+
+/* Add row btn */
+.add-row-zone{padding:12px;text-align:center}
+.add-row-btn{font-family:inherit;font-size:13px;font-weight:500;color:var(--text-dim);background:none;border:1px dashed var(--border);border-radius:var(--radius-sm);padding:10px 24px;cursor:pointer;transition:all .15s}
+.add-row-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* Footer */
+.footer{text-align:center;padding:20px;color:var(--text-muted);font-size:12px}
+
+/* Responsive */
+@media(max-width:1024px){
+  .config-bar{flex-wrap:wrap}
+  .config-card{min-width:calc(50% - 12px)}
+}
+@media(max-width:768px){
+  body{padding:14px 10px}
+  .app{max-width:100%}
+  .header{flex-direction:column;gap:10px;align-items:flex-start;margin-bottom:20px;padding-bottom:16px}
+  .header h1{font-size:18px}
+  .header-actions{width:100%;display:flex}
+  .header-actions .btn{flex:1;justify-content:center;font-size:12px;padding:8px 12px}
+  .config-bar{flex-direction:column;gap:10px;margin-bottom:14px}
+  .config-card{min-width:100%;padding:12px 16px}
+  .config-card .value-display{font-size:16px}
+  .preset-chip{font-size:11px;padding:5px 11px}
+  .summary{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+  .summary-card{padding:14px}
+  .summary-card .number{font-size:20px}
+  .summary-card .label{font-size:10px}
+  .summary-card .sub{font-size:11px}
+  .table-wrap{overflow-x:auto;margin-bottom:14px;border-radius:8px}
+  table{min-width:720px}
+  tbody td{padding:6px 8px}
+  .t-input{font-size:16px;padding:8px 10px}
+  .t-input.num{width:72px}
+  .t-input.task-name{min-width:140px}
+  .t-select{font-size:16px;padding:8px 10px;-webkit-appearance:menulist;appearance:menulist;background-image:none;padding-right:10px}
+  .breakdown{padding:14px;margin-bottom:14px}
+  .add-row-btn{font-size:12px;padding:8px 18px}
+  .btn-icon{width:28px;height:28px}
+}
+@media(max-width:400px){
+  .summary{grid-template-columns:1fr}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <h1>⏱ Task Estimation <span>CALC</span></h1>
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="resetAll()">↻ Reset</button>
+      <button class="btn btn-primary" onclick="exportXLSX()">↓ Export Excel</button>
+    </div>
+  </div>
+
+  <!-- Presets -->
+  <div class="config-bar">
+    <div class="config-card" style="flex:2;min-width:280px">
+      <label>Quick Presets</label>
+      <div class="preset-chips">
+        <button class="preset-chip" onclick="applyPreset('banner')">HTML5 Banner</button>
+        <button class="preset-chip" onclick="applyPreset('richmedia')">Rich Media</button>
+        <button class="preset-chip" onclick="applyPreset('edm')">EDM / Email</button>
+        <button class="preset-chip" onclick="applyPreset('landing')">Landing Page</button>
+        <button class="preset-chip" onclick="applyPreset('custom')">Custom</button>
+      </div>
+    </div>
+    <div class="config-card">
+      <label>Buffer</label>
+      <div class="value-row">
+        <input type="range" id="bufferRange" min="0" max="50" value="15" oninput="updateBuffer()">
+        <div class="value-display" id="bufferDisplay">15<span class="value-unit">%</span></div>
+      </div>
+    </div>
+    <div class="config-card">
+      <label>Correction Rounds</label>
+      <div class="value-row">
+        <input type="range" id="correctionRange" min="0" max="5" value="1" oninput="updateCorrection()">
+        <div class="value-display" id="correctionDisplay">1<span class="value-unit"> rnd</span></div>
+      </div>
+    </div>
+    <div class="config-card">
+      <label>Min / Correction</label>
+      <div class="value-row">
+        <input type="range" id="corrMinRange" min="5" max="60" value="15" step="5" oninput="updateCorrMin()">
+        <div class="value-display" id="corrMinDisplay">15<span class="value-unit"> min</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px">#</th>
+          <th>Task Name</th>
+          <th>Type</th>
+          <th class="center">Master Qty</th>
+          <th class="center">Min/Master</th>
+          <th class="center">Version Qty</th>
+          <th class="center">Min/Version</th>
+          <th class="center">Master (h)</th>
+          <th class="center">Version (h)</th>
+          <th class="center">Subtotal (h)</th>
+          <th style="width:40px"></th>
+        </tr>
+      </thead>
+      <tbody id="taskBody"></tbody>
+    </table>
+    <div class="add-row-zone">
+      <button class="add-row-btn" onclick="addTask()">+ Add Task</button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary" id="summaryCards">
+    <div class="summary-card blue">
+      <div class="label">Base Time</div>
+      <div class="number" id="sumBase">0.00h</div>
+      <div class="sub" id="sumBaseDay">0.00 days</div>
+    </div>
+    <div class="summary-card orange">
+      <div class="label">Buffer</div>
+      <div class="number" id="sumBuffer">0.00h</div>
+      <div class="sub" id="sumBufferPct">15%</div>
+    </div>
+    <div class="summary-card red">
+      <div class="label">Corrections</div>
+      <div class="number" id="sumCorr">0.00h</div>
+      <div class="sub" id="sumCorrInfo">1 round × 15 min</div>
+    </div>
+    <div class="summary-card green">
+      <div class="label">Total Estimate</div>
+      <div class="number" id="sumTotal">0.00h</div>
+      <div class="sub" id="sumTotalDay">0.00 days (8h/day)</div>
+    </div>
+    <div class="summary-card purple">
+      <div class="label">Total Tasks</div>
+      <div class="number" id="sumTasks">0</div>
+      <div class="sub" id="sumTasksInfo">0 master + 0 version</div>
+    </div>
+  </div>
+
+  <!-- Breakdown -->
+  <div class="breakdown">
+    <h3>📊 Time Breakdown</h3>
+    <div class="time-bar" id="timeBar">
+      <div class="seg master" style="width:0%"></div>
+      <div class="seg version" style="width:0%"></div>
+      <div class="seg buffer" style="width:0%"></div>
+      <div class="seg correction" style="width:0%"></div>
+    </div>
+    <div class="bar-legend">
+      <span class="lm">Master <b id="legMaster">0h</b></span>
+      <span class="lv">Versioning <b id="legVersion">0h</b></span>
+      <span class="lb">Buffer <b id="legBuffer">0h</b></span>
+      <span class="lc">Corrections <b id="legCorr">0h</b></span>
+    </div>
+  </div>
+
+  <div class="footer">Task Estimation Calculator — Built for speed ⚡</div>
+</div>
+
+<script>
+const PRESETS = {
+  banner:    { label:'HTML5 Banner',  minMaster:90,  minVersion:35, corrMin:15 },
+  richmedia: { label:'Rich Media',    minMaster:180, minVersion:60, corrMin:30 },
+  edm:       { label:'EDM / Email',   minMaster:120, minVersion:30, corrMin:20 },
+  landing:   { label:'Landing Page',  minMaster:480, minVersion:120,corrMin:45 },
+  custom:    { label:'Custom',        minMaster:0,   minVersion:0,  corrMin:15 }
+};
+
+let tasks = [];
+let taskCounter = 0;
+let currentPreset = null;
+
+function addTask(preset) {
+  const p = preset || (currentPreset ? PRESETS[currentPreset] : null);
+  tasks.push({
+    id: ++taskCounter,
+    name: '',
+    type: currentPreset || 'custom',
+    masterQty: 0,
+    minMaster: p ? p.minMaster : 0,
+    versionQty: 0,
+    minVersion: p ? p.minVersion : 0
+  });
+  render();
+}
+
+function removeTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  render();
+}
+
+function updateField(id, field, value) {
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  if (['masterQty','minMaster','versionQty','minVersion'].includes(field)) {
+    t[field] = parseFloat(value) || 0;
+  } else if (field === 'type') {
+    t.type = value;
+    if (PRESETS[value] && value !== 'custom') {
+      t.minMaster = PRESETS[value].minMaster;
+      t.minVersion = PRESETS[value].minVersion;
+    }
+  } else {
+    t[field] = value;
+  }
+  render();
+}
+
+function applyPreset(key) {
+  currentPreset = key;
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  if (PRESETS[key]) {
+    document.getElementById('corrMinRange').value = PRESETS[key].corrMin;
+    updateCorrMin();
+  }
+}
+
+function updateBuffer() {
+  const v = document.getElementById('bufferRange').value;
+  document.getElementById('bufferDisplay').innerHTML = v + '<span class="value-unit">%</span>';
+  recalc();
+}
+function updateCorrection() {
+  const v = document.getElementById('correctionRange').value;
+  document.getElementById('correctionDisplay').innerHTML = v + '<span class="value-unit"> rnd</span>';
+  recalc();
+}
+function updateCorrMin() {
+  const v = document.getElementById('corrMinRange').value;
+  document.getElementById('corrMinDisplay').innerHTML = v + '<span class="value-unit"> min</span>';
+  recalc();
+}
+
+function render() {
+  const tbody = document.getElementById('taskBody');
+  tbody.innerHTML = '';
+  tasks.forEach((t, i) => {
+    const mh = (t.masterQty * t.minMaster) / 60;
+    const vh = (t.versionQty * t.minVersion) / 60;
+    const sub = mh + vh;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="row-num">${i + 1}</td>
+      <td><input class="t-input task-name" value="${esc(t.name)}" placeholder="e.g. Banner 300x250" onchange="updateField(${t.id},'name',this.value)"></td>
+      <td>
+        <select class="t-select" onchange="updateField(${t.id},'type',this.value)">
+          ${Object.entries(PRESETS).map(([k,v]) => `<option value="${k}" ${t.type===k?'selected':''}>${v.label}</option>`).join('')}
+        </select>
+      </td>
+      <td><input class="t-input num" type="number" min="0" value="${t.masterQty}" onchange="updateField(${t.id},'masterQty',this.value)"></td>
+      <td><input class="t-input num" type="number" min="0" value="${t.minMaster}" onchange="updateField(${t.id},'minMaster',this.value)"></td>
+      <td><input class="t-input num" type="number" min="0" value="${t.versionQty}" onchange="updateField(${t.id},'versionQty',this.value)"></td>
+      <td><input class="t-input num" type="number" min="0" value="${t.minVersion}" onchange="updateField(${t.id},'minVersion',this.value)"></td>
+      <td class="computed">${mh.toFixed(2)}</td>
+      <td class="computed">${vh.toFixed(2)}</td>
+      <td class="computed highlight">${sub.toFixed(2)}</td>
+      <td><button class="btn-icon delete" onclick="removeTask(${t.id})" title="Remove">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  recalc();
+}
+
+function recalc() {
+  const buffer = parseInt(document.getElementById('bufferRange').value) / 100;
+  const corrRounds = parseInt(document.getElementById('correctionRange').value);
+  const corrMin = parseInt(document.getElementById('corrMinRange').value);
+
+  let totalMasterH = 0, totalVersionH = 0, totalMasterQty = 0, totalVersionQty = 0, totalTasks = 0;
+
+  tasks.forEach(t => {
+    totalMasterH += (t.masterQty * t.minMaster) / 60;
+    totalVersionH += (t.versionQty * t.minVersion) / 60;
+    totalMasterQty += t.masterQty;
+    totalVersionQty += t.versionQty;
+    totalTasks += t.masterQty + t.versionQty;
+  });
+
+  const baseH = totalMasterH + totalVersionH;
+  const bufferH = baseH * buffer;
+  const corrH = (totalTasks * corrRounds * corrMin) / 60;
+  const totalH = baseH + bufferH + corrH;
+  const totalDays = totalH / 8;
+
+  // Summary cards
+  document.getElementById('sumBase').textContent = baseH.toFixed(2) + 'h';
+  document.getElementById('sumBaseDay').textContent = (baseH/8).toFixed(2) + ' days';
+  document.getElementById('sumBuffer').textContent = bufferH.toFixed(2) + 'h';
+  document.getElementById('sumBufferPct').textContent = (buffer*100).toFixed(0) + '% of base';
+  document.getElementById('sumCorr').textContent = corrH.toFixed(2) + 'h';
+  document.getElementById('sumCorrInfo').textContent = `${totalTasks} tasks × ${corrRounds} rnd × ${corrMin} min`;
+  document.getElementById('sumTotal').textContent = totalH.toFixed(2) + 'h';
+  document.getElementById('sumTotalDay').textContent = totalDays.toFixed(2) + ' days (8h/day)';
+  document.getElementById('sumTasks').textContent = totalTasks;
+  document.getElementById('sumTasksInfo').textContent = `${totalMasterQty} master + ${totalVersionQty} version`;
+
+  // Bar
+  const total = totalMasterH + totalVersionH + bufferH + corrH || 1;
+  document.querySelector('.seg.master').style.width = (totalMasterH/total*100)+'%';
+  document.querySelector('.seg.version').style.width = (totalVersionH/total*100)+'%';
+  document.querySelector('.seg.buffer').style.width = (bufferH/total*100)+'%';
+  document.querySelector('.seg.correction').style.width = (corrH/total*100)+'%';
+
+  document.getElementById('legMaster').textContent = totalMasterH.toFixed(2)+'h';
+  document.getElementById('legVersion').textContent = totalVersionH.toFixed(2)+'h';
+  document.getElementById('legBuffer').textContent = bufferH.toFixed(2)+'h';
+  document.getElementById('legCorr').textContent = corrH.toFixed(2)+'h';
+}
+
+function esc(s) { return s.replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+function resetAll() {
+  if (!confirm('Reset everything?')) return;
+  tasks = [];
+  taskCounter = 0;
+  currentPreset = null;
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('bufferRange').value = 15; updateBuffer();
+  document.getElementById('correctionRange').value = 1; updateCorrection();
+  document.getElementById('corrMinRange').value = 15; updateCorrMin();
+  render();
+}
+
+async function exportXLSX() {
+  const buffer = parseInt(document.getElementById('bufferRange').value);
+  const corrRounds = parseInt(document.getElementById('correctionRange').value);
+  const corrMin = parseInt(document.getElementById('corrMinRange').value);
+
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Estimation');
+
+  // Colors
+  const cBg = 'FF0F1117';
+  const cSurface = 'FF1A1D27';
+  const cSurface2 = 'FF232733';
+  const cBorder = 'FF333847';
+  const cText = 'FFF0F1F5';
+  const cDim = 'FFB8BCC8';
+  const cAccent = 'FF6C9FFF';
+  const cGreen = 'FF4ECB8D';
+  const cOrange = 'FFF0A050';
+  const cRed = 'FFF06060';
+  const cPurple = 'FFA07CFF';
+  const cWhite = 'FFFFFFFF';
+
+  const borderThin = { style:'thin', color:{argb:cBorder} };
+  const borders = { top:borderThin, left:borderThin, bottom:borderThin, right:borderThin };
+
+  const fontHead = { name:'Segoe UI', size:11, bold:true, color:{argb:cWhite} };
+  const fontBody = { name:'Segoe UI', size:10, color:{argb:cText} };
+  const fontMono = { name:'Consolas', size:10, color:{argb:cDim} };
+  const fontMonoB = { name:'Consolas', size:10, bold:true, color:{argb:cAccent} };
+  const fontLabel = { name:'Segoe UI', size:10, bold:true, color:{argb:cDim} };
+  const fontGrand = { name:'Consolas', size:12, bold:true, color:{argb:cGreen} };
+
+  // Column widths
+  ws.columns = [
+    { width:5 },  // No
+    { width:28 }, // Task Name
+    { width:15 }, // Type
+    { width:12 }, // Master Qty
+    { width:13 }, // Min/Master
+    { width:12 }, // Version Qty
+    { width:13 }, // Min/Version
+    { width:12 }, // Master(h)
+    { width:12 }, // Version(h)
+    { width:13 }, // Subtotal(h)
+  ];
+
+  // Fill entire background
+  for (let r = 1; r <= 30; r++) {
+    const row = ws.getRow(r);
+    for (let c = 1; c <= 10; c++) {
+      const cell = row.getCell(c);
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:cBg} };
+    }
+  }
+
+  // Title row
+  ws.mergeCells('A1:J1');
+  const titleCell = ws.getCell('A1');
+  titleCell.value = '⏱  TASK ESTIMATION';
+  titleCell.font = { name:'Segoe UI', size:14, bold:true, color:{argb:cAccent} };
+  titleCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:cSurface} };
+  titleCell.alignment = { vertical:'middle', horizontal:'left' };
+  titleCell.border = borders;
+  ws.getRow(1).height = 32;
+
+  // Config info row
+  ws.mergeCells('A2:J2');
+  const cfgCell = ws.getCell('A2');
+  cfgCell.value = `Buffer: ${buffer}%  |  Corrections: ${corrRounds} round(s) × ${corrMin} min/task  |  Date: ${new Date().toLocaleDateString()}`;
+  cfgCell.font = { name:'Segoe UI', size:9, italic:true, color:{argb:cDim} };
+  cfgCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:cSurface} };
+  cfgCell.alignment = { vertical:'middle' };
+  cfgCell.border = borders;
+  ws.getRow(2).height = 22;
+
+  // Empty spacer
+  ws.getRow(3).height = 8;
+
+  // Header row (row 4)
+  const headers = ['#','Task Name','Type','Master Qty','Min/Master','Version Qty','Min/Version','Master (h)','Version (h)','Subtotal (h)'];
+  const headerRow = ws.getRow(4);
+  headerRow.height = 28;
+  headers.forEach((h, i) => {
+    const cell = headerRow.getCell(i + 1);
+    cell.value = h;
+    cell.font = fontHead;
+    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF667EEA'} };
+    cell.alignment = { vertical:'middle', horizontal: i >= 3 ? 'center' : 'left' };
+    cell.border = borders;
+  });
+
+  // Data rows
+  let totalH = 0;
+  let startRow = 5;
+  tasks.forEach((t, i) => {
+    const mh = (t.masterQty * t.minMaster) / 60;
+    const vh = (t.versionQty * t.minVersion) / 60;
+    const sub = mh + vh;
+    totalH += sub;
+
+    const r = ws.getRow(startRow + i);
+    r.height = 24;
+    const vals = [i+1, t.name || '—', PRESETS[t.type]?.label || t.type, t.masterQty, t.minMaster, t.versionQty, t.minVersion, +mh.toFixed(2), +vh.toFixed(2), +sub.toFixed(2)];
+    const isEven = i % 2 === 0;
+    vals.forEach((v, ci) => {
+      const cell = r.getCell(ci + 1);
+      cell.value = v;
+      cell.font = ci >= 7 ? (ci === 9 ? fontMonoB : fontMono) : fontBody;
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb: isEven ? cSurface : cSurface2} };
+      cell.alignment = { vertical:'middle', horizontal: ci >= 3 ? 'center' : 'left' };
+      cell.border = borders;
+      if (ci >= 7) cell.numFmt = '0.00';
+    });
+  });
+
+  // Summary section
+  const sumStart = startRow + tasks.length + 1;
+
+  // Spacer row
+  ws.getRow(sumStart - 1).height = 8;
+
+  const bufferH = totalH * buffer / 100;
+  const totalTasks = tasks.reduce((s,t) => s + t.masterQty + t.versionQty, 0);
+  const corrH = (totalTasks * corrRounds * corrMin) / 60;
+  const grand = totalH + bufferH + corrH;
+
+  const summaryData = [
+    { label:'Base Total', value:+totalH.toFixed(2), color:cAccent },
+    { label:`Buffer (${buffer}%)`, value:+bufferH.toFixed(2), color:cOrange },
+    { label:`Corrections (${corrRounds}rnd × ${corrMin}min)`, value:+corrH.toFixed(2), color:cRed },
+    { label:'GRAND TOTAL', value:+grand.toFixed(2), color:cGreen, grand:true },
+    { label:'Total Days (8h/day)', value:+(grand/8).toFixed(2), color:cPurple },
+    { label:'Total Tasks', value:totalTasks, color:cDim, info:`${tasks.reduce((s,t)=>s+t.masterQty,0)} master + ${tasks.reduce((s,t)=>s+t.versionQty,0)} version` },
+  ];
+
+  // Summary header
+  ws.mergeCells(sumStart, 1, sumStart, 10);
+  const sumHeaderCell = ws.getCell(sumStart, 1);
+  sumHeaderCell.value = '📊  SUMMARY';
+  sumHeaderCell.font = { name:'Segoe UI', size:11, bold:true, color:{argb:cAccent} };
+  sumHeaderCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:cSurface} };
+  sumHeaderCell.border = borders;
+  ws.getRow(sumStart).height = 28;
+
+  summaryData.forEach((item, i) => {
+    const r = ws.getRow(sumStart + 1 + i);
+    r.height = item.grand ? 30 : 24;
+
+    // Label spans cols 1-8
+    ws.mergeCells(sumStart + 1 + i, 1, sumStart + 1 + i, 9);
+    const labelCell = r.getCell(1);
+    labelCell.value = item.label;
+    labelCell.font = item.grand
+      ? { name:'Segoe UI', size:11, bold:true, color:{argb:cWhite} }
+      : fontLabel;
+    labelCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb: item.grand ? cSurface2 : cSurface} };
+    labelCell.alignment = { vertical:'middle', horizontal:'right' };
+    labelCell.border = borders;
+
+    // Value in col 10
+    const valCell = r.getCell(10);
+    valCell.value = item.value;
+    valCell.numFmt = item.label.includes('Tasks') ? '0' : '0.00';
+    valCell.font = item.grand ? fontGrand : { name:'Consolas', size:11, bold:true, color:{argb:item.color} };
+    valCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb: item.grand ? cSurface2 : cSurface} };
+    valCell.alignment = { vertical:'middle', horizontal:'center' };
+    valCell.border = borders;
+  });
+
+  // Generate & download
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `estimation_${new Date().toISOString().slice(0,10)}.xlsx`;
+  a.click();
+}
+
+// Init with one empty row
+addTask();
+</script>
+</body>
+</html>
