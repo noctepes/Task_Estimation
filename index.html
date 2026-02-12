@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Task Estimation Calculator</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -167,18 +167,20 @@ tbody tr:hover{background:rgba(108,159,255,.03)}
 
   /* Mobile task card */
   .m-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;position:relative}
-  .m-card-head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .m-card-head{display:flex;gap:8px;align-items:center;margin-bottom:10px;padding-right:0}
   .m-card-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);background:var(--surface3);width:24px;height:24px;border-radius:4px;display:grid;place-items:center;flex-shrink:0}
-  .m-card-head input{flex:1;font-family:inherit;font-size:14px;color:var(--text);background:var(--surface3);border:1px solid transparent;border-radius:var(--radius-sm);padding:8px 10px}
+  .m-card-head input{flex:1;font-family:inherit;font-size:16px;color:var(--text);background:var(--surface3);border:1px solid transparent;border-radius:var(--radius-sm);padding:8px 10px;min-width:0}
   .m-card-head input:focus{outline:none;border-color:var(--accent)}
-  .m-card-head select{font-family:inherit;font-size:14px;color:var(--text);background:var(--surface3);border:1px solid transparent;border-radius:var(--radius-sm);padding:8px 10px;-webkit-appearance:menulist;appearance:menulist;min-width:100px}
-  .m-card-head .btn-icon{position:absolute;top:10px;right:10px;width:26px;height:26px;font-size:12px}
+  .m-card-head select{font-family:inherit;font-size:16px;color:var(--text);background:var(--surface3);border:1px solid transparent;border-radius:var(--radius-sm);padding:8px 10px;-webkit-appearance:menulist;appearance:menulist;min-width:90px;flex-shrink:0}
+  .m-card-head .m-delete{width:30px;height:30px;flex-shrink:0;display:grid;place-items:center;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:14px;transition:all .15s}
+  .m-card-head .m-delete:hover,.m-card-head .m-delete:active{background:var(--red-dim);border-color:var(--red);color:var(--red)}
   .m-card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-  .m-card-field{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:6px;padding:6px 10px}
-  .m-card-field span{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
-  .m-card-field input{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);background:transparent;border:none;text-align:right;width:50px;outline:none}
+  .m-card-field{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:6px;padding:10px 12px;cursor:text;-webkit-tap-highlight-color:transparent;transition:background .15s}
+  .m-card-field:active,.m-card-field:focus-within{background:var(--surface3)}
+  .m-card-field span{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;pointer-events:none}
+  .m-card-field input{font-family:'JetBrains Mono',monospace;font-size:16px;color:var(--text);background:transparent;border:none;text-align:right;width:60px;outline:none;-webkit-tap-highlight-color:transparent}
   .m-card-result{display:flex;gap:6px;margin-top:8px}
-  .m-card-result .m-res{flex:1;background:var(--surface2);border-radius:6px;padding:6px 10px;text-align:center}
+  .m-card-result .m-res{flex:1;background:var(--surface2);border-radius:6px;padding:8px 10px;text-align:center}
   .m-card-result .m-res span{font-size:9px;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:2px}
   .m-card-result .m-res b{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-dim)}
   .m-card-result .m-res.total b{color:var(--accent);font-size:14px}
@@ -452,13 +454,13 @@ function render() {
         <select onchange="updateField(${t.id},'type',this.value)">
           ${Object.entries(PRESETS).map(([k,v]) => `<option value="${k}" ${t.type===k?'selected':''}>${v.label}</option>`).join('')}
         </select>
-        <button class="btn-icon delete" onclick="removeTask(${t.id})">✕</button>
+        <button class="m-delete" onclick="removeTask(${t.id})">✕</button>
       </div>
       <div class="m-card-grid">
-        <div class="m-card-field"><span>Master Qty</span><input type="number" min="0" value="${t.masterQty}" onchange="updateField(${t.id},'masterQty',this.value)"></div>
-        <div class="m-card-field"><span>Min/Master</span><input type="number" min="0" value="${t.minMaster}" onchange="updateField(${t.id},'minMaster',this.value)"></div>
-        <div class="m-card-field"><span>Version Qty</span><input type="number" min="0" value="${t.versionQty}" onchange="updateField(${t.id},'versionQty',this.value)"></div>
-        <div class="m-card-field"><span>Min/Ver</span><input type="number" min="0" value="${t.minVersion}" onchange="updateField(${t.id},'minVersion',this.value)"></div>
+        <div class="m-card-field" onclick="this.querySelector('input').focus();this.querySelector('input').select()"><span>Master Qty</span><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" value="${t.masterQty}" onchange="updateField(${t.id},'masterQty',this.value)" onfocus="this.select()"></div>
+        <div class="m-card-field" onclick="this.querySelector('input').focus();this.querySelector('input').select()"><span>Min/Master</span><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" value="${t.minMaster}" onchange="updateField(${t.id},'minMaster',this.value)" onfocus="this.select()"></div>
+        <div class="m-card-field" onclick="this.querySelector('input').focus();this.querySelector('input').select()"><span>Version Qty</span><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" value="${t.versionQty}" onchange="updateField(${t.id},'versionQty',this.value)" onfocus="this.select()"></div>
+        <div class="m-card-field" onclick="this.querySelector('input').focus();this.querySelector('input').select()"><span>Min/Ver</span><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" value="${t.minVersion}" onchange="updateField(${t.id},'minVersion',this.value)" onfocus="this.select()"></div>
       </div>
       <div class="m-card-result">
         <div class="m-res"><span>Master</span><b>${mh.toFixed(2)}h</b></div>
